@@ -24,8 +24,14 @@ const HomePage: React.FC = () => {
       <div>
         <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
           <div className="flex items-center">
-            {country && <span className="mr-2">{getFlagEmoji(country)}</span>}
-            <span>{session.user?.name}</span>
+            {/* Muestra la imagen de perfil del usuario */}
+            <img 
+              src={session.user?.image || '/default-profile.png'} 
+              alt="User profile" 
+              className="w-10 h-10 rounded-full mr-3  " 
+            />
+            <span className="mr-2">{session.user?.name}</span>
+            {country && <span >{getFlagEmoji(country)}</span>}
           </div>
           <button onClick={() => signOut()} className="bg-red-500 px-4 py-2 rounded">
             Sign Out
