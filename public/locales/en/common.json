@@ -3,7 +3,14 @@
     "description": "The music challenge awaits. Are you ready to show off your musical knowledge?",
     "classicMode": "Classic Mode",
     "dailyChallenge": "Daily Challenge",
-    "competitiveLeague": "Competitive League",
-    "signInWithSpotify": "Sign in with Spotify"
+    "moddedMode": "Mutation mode",
+    "signInWithSpotify": "Sign in with Spotify",
+    "webInfoTitle": "About This Website",
+    "webInfoContent": "This platform allows you to compete in music challenges and improve your musical knowledge. Join our community and explore different game modes!",
+    "howToPlayTitle": "How to Play",
+    "howToPlayContent": "Select a game mode, listen to song snippets, and guess the title or artist. Compete with others and climb the leaderboard!",
+    "updatesTitle": "News and Updates",
+    "updatesContent": "Stay up-to-date with the latest news, including new game modes, platform improvements, and special events. Don’t miss out on any updates!",
+    "selectLanguage": "Select the language:"
   }
   

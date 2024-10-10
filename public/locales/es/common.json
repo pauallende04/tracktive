@@ -3,7 +3,14 @@
     "description": "El desafío de la música te espera. ¿Estás listo para demostrar tus conocimientos musicales?",
     "classicMode": "Modo Clásico",
     "dailyChallenge": "Desafío Diario",
-    "competitiveLeague": "Liga Competitiva",
-    "signInWithSpotify": "Conéctate con Spotify"
+    "moddedMode": "Modo mutado",
+    "signInWithSpotify": "Conéctate con Spotify",
+    "webInfoTitle": "Información de la Web",
+    "webInfoContent": "Esta plataforma te permite competir en desafíos musicales y mejorar tus conocimientos musicales. ¡Únete a nuestra comunidad y explora distintos modos de juego!",
+    "howToPlayTitle": "Cómo se Juega",
+    "howToPlayContent": "Selecciona un modo de juego, escucha fragmentos de canciones y adivina el título o el artista. Compite con otros jugadores y sube en la clasificación.",
+    "updatesTitle": "Noticias y Actualizaciones",
+    "updatesContent": "Mantente al día con las últimas novedades, incluyendo nuevos modos de juego, mejoras de la plataforma y eventos especiales. ¡No te pierdas las actualizaciones!",
+    "selectLanguage": "Selecciona el idioma:"
   }
   

@@ -12,6 +12,7 @@
     "@heroicons/react": "^2.1.5",
     "axios": "^1.7.5",
     "i18next": "^23.15.1",
+    "i18next-http-backend": "^2.6.2",
     "next": "14.2.6",
     "next-auth": "^4.24.7",
     "next-i18next": "^15.3.1",
