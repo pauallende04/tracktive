@@ -1,19 +1,18 @@
-// src/app/components/LanguageSwitcher.tsx
 'use client';
 
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { signOut } from 'next-auth/react';
+import { signOut, signIn } from 'next-auth/react';
 
-const LanguageSwitcher = () => {
+const LanguageSwitcher = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const changeLanguage = async (lng: string) => {
     if (i18n && i18n.changeLanguage) {
       await i18n.changeLanguage(lng);
-      localStorage.setItem('language', lng); // Guarda el idioma seleccionado en localStorage
-      setIsOpen(false); // Cierra el menú después de cambiar el idioma
+      localStorage.setItem('language', lng);
+      setIsOpen(false);
     }
   };
 
@@ -56,12 +55,21 @@ const LanguageSwitcher = () => {
             </button>
           </div>
           <hr className="my-2" />
-          <button
-            onClick={() => signOut()}
-            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-          >
-            Logout
-          </button>
+          {isAuthenticated ? (
+            <button
+              onClick={() => signOut()}
+              className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+            >
+              Cerrar sesión
+            </button>
+          ) : (
+            <button
+              onClick={() => signIn()}
+              className="block w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-100"
+            >
+              Iniciar sesión
+            </button>
+          )}
         </div>
       )}
     </div>
