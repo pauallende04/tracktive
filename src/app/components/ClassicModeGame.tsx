@@ -4,6 +4,7 @@ import { getTopTracks } from '../utils/spotify';
 import { getUserStreak, updateUserStreak } from '../utils/streaks';
 import axios from 'axios';
 import Confetti from 'react-confetti';
+import Head from 'next/head';
 
 
 const ClassicModeGame = ({
@@ -235,6 +236,14 @@ const ClassicModeGame = ({
   };
 
   return (
+    <>
+      <Head>
+        <title>Modo Clásico - Tracktive</title>
+        <meta name="description" content="Prueba el modo clásico de Tracktive y adivina canciones en segundos." />
+        <meta property="og:title" content="Modo Clásico - Tracktive" />
+        <meta property="og:description" content="¿Cuántas canciones puedes adivinar en el modo clásico de Tracktive?" />
+        <meta property="og:image" content="/static/classic-mode-game.jpg" />
+      </Head>
     <div className="flex flex-col items-center min-h-screen bg-green-100 pt-16">
       {isGuessedCorrectly && <Confetti />}
       
@@ -383,6 +392,7 @@ const ClassicModeGame = ({
         <audio id="audio-full" src={track.track.preview_url} preload="auto" />
       )}
     </div>
+    </>
   );
 };
 

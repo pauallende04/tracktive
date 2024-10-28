@@ -60,14 +60,14 @@ const LanguageSwitcher = ({ isAuthenticated }: { isAuthenticated: boolean }) => 
               onClick={() => signOut()}
               className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
             >
-              Cerrar sesión
+              {t('signOut')}
             </button>
           ) : (
             <button
               onClick={() => signIn()}
               className="block w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-100"
             >
-              Iniciar sesión
+              {t('signIn')}
             </button>
           )}
         </div>

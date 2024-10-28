@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const ClassicModeConfig = ({ onStartGame }: { onStartGame: (fragments: number, duration: number) => void }) => {
+const ArtistModeConfig = ({ onStartGame }: { onStartGame: (fragments: number, duration: number) => void }) => {
   const [fragments, setFragments] = useState(3);
   const [duration, setDuration] = useState(5);
   const { t } = useTranslation('common');
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-green-100">
-      <h2 className="text-2xl font-bold mb-4">{t('configureClassic')}</h2>
+      <h2 className="text-2xl font-bold mb-4">{t('configureArtists')}</h2>
       
       <div className="mb-6">
         <label className="block mb-2">{t('numFragments')}</label>
@@ -43,9 +43,9 @@ const ClassicModeConfig = ({ onStartGame }: { onStartGame: (fragments: number, d
         {t('play')}
       </button>
 
-      <p className="text-gray-400 italic">{t('howToPlayContent')}</p>
+      <p className="text-gray-400 italic">{t('guessArtist')}</p>
     </div>
   );
 };
 
-export default ClassicModeConfig;
+export default ArtistModeConfig;
