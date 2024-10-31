@@ -24,17 +24,10 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
   const [fragments, setFragments] = useState(3);
   const [duration, setDuration] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const isGenresDisabled = true;
 
-  // Detección de dispositivo móvil
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Calcular si se puede iniciar el juego
+  const canStartGame = selectedPlaylists.length > 0 || selectedArtists.length > 0;
 
   useEffect(() => {
     if (accessToken) {
@@ -92,10 +85,6 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
     setFilteredPlaylists(playlists.filter((playlist) => playlist.name.toLowerCase().includes(filter.toLowerCase())));
   };
 
-  const handleFilterGenres = (filter: string) => {
-    setFilteredGenres(genres.filter((genre) => genre.toLowerCase().includes(filter.toLowerCase())));
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-green-100">
@@ -105,10 +94,10 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen bg-green-100 ${isMobile ? 'p-4' : 'p-8'}`}>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-green-100 p-8">
       <h2 className="text-3xl font-bold mb-8">{t('configureMutation')}</h2>
 
-      <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 gap-8'} w-full max-w-4xl`}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
         {/* Playlists */}
         <div>
           <h3 className="text-xl font-semibold mb-2">{t('selectPlaylists')}</h3>
@@ -129,7 +118,7 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
                 )}
                 className={`p-4 border rounded-lg shadow-md cursor-pointer transition ${
                   selectedPlaylists.includes(playlist.id) ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'
-                } ${isMobile ? 'w-full' : 'w-auto'}`}
+                }`}
               >
                 <img
                   src={playlist.images?.length > 0 ? playlist.images[0].url : '/default-image.jpg'}
@@ -142,27 +131,22 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
           </div>
         </div>
 
-        {/* Genres */}
+        {/* Genres (Desactivado) */}
         <div>
-          <h3 className="text-xl font-semibold mb-2">{t('selectGenres')}</h3>
+          <h3 className="text-xl font-semibold mb-2 text-gray-400">{t('selectGenres')} (Desactivado)</h3>
           <input
             type="text"
             placeholder={t('searchGenres')}
-            onChange={(e) => handleFilterGenres(e.target.value)}
-            className="w-full p-2 mb-2 border rounded-lg"
+            onChange={() => {}} // Sin función de filtro ya que está deshabilitado
+            className="w-full p-2 mb-2 border rounded-lg bg-gray-100 cursor-not-allowed"
+            disabled
           />
-          <div className="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto border-t pt-4">
+          <div className="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto border-t pt-4 opacity-50">
             {filteredGenres.map((genre) => (
               <div
                 key={genre}
-                onClick={() => setSelectedGenres((prev) =>
-                  prev.includes(genre)
-                    ? prev.filter((g) => g !== genre)
-                    : [...prev, genre]
-                )}
-                className={`p-4 border rounded-lg shadow-md cursor-pointer transition ${
-                  selectedGenres.includes(genre) ? 'bg-purple-500 text-white' : 'bg-white text-gray-800'
-                } ${isMobile ? 'w-full' : 'w-auto'}`}
+                onClick={() => {}} // Deshabilitado sin acción de clic
+                className={`p-4 border rounded-lg shadow-md cursor-not-allowed transition bg-gray-200 text-gray-500`}
               >
                 <p className="text-center font-medium">{genre}</p>
               </div>
@@ -194,7 +178,7 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
                 )}
                 className={`p-4 border rounded-lg shadow-md cursor-pointer transition ${
                   selectedArtists.includes(artist.id) ? 'bg-green-500 text-white' : 'bg-white text-gray-800'
-                } ${isMobile ? 'w-full' : 'w-auto'}`}
+                }`}
               >
                 <img
                   src={artist.images?.length > 0 ? artist.images[0].url : '/default-image.jpg'}
@@ -219,7 +203,7 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
                 onClick={() => setFragments(option)}
                 className={`px-4 py-2 rounded-full shadow-lg transition ${
                   fragments === option ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'
-                } ${isMobile ? 'w-full' : 'w-auto'}`}
+                }`}
               >
                 {t(`fragmentOptions.${option === 1 ? 'oneFragment' : option === 3 ? 'threeFragments' : 'fiveFragments'}`)}
               </button>
@@ -236,7 +220,7 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
                 onClick={() => setDuration(option)}
                 className={`px-4 py-2 rounded-full shadow-lg transition ${
                   duration === option ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'
-                } ${isMobile ? 'w-full' : 'w-auto'}`}
+                }`}
               >
                 {t(`durationOptions.${option === 2 ? 'twoSeconds' : option === 4 ? 'fourSeconds' : 'fiveSeconds'}`)}
               </button>
@@ -249,13 +233,15 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
         onClick={() => {
           const newSelection = [
             ...selectedPlaylists.map((playlist) => ({ type: 'playlist', id: playlist })),
-            ...selectedGenres.map((genre) => ({ type: 'genre', id: genre })),
             ...selectedArtists.map((artist) => ({ type: 'artist', id: artist })),
           ];
           
           onStartGame(newSelection, fragments, duration);
         }}
-        className={`px-6 py-3 mt-10 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-500 transition ${isMobile ? 'w-full' : 'w-auto'}`}
+        className={`px-6 py-3 mt-10 font-semibold rounded-full shadow-lg transition ${
+          canStartGame ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+        }`}
+        disabled={!canStartGame}
       >
         {t('play')}
       </button>

@@ -111,14 +111,14 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
           }
         }
 
-        if (selectedGenres.length > 0) {
-          const genreTracks = await fetchTracksFromGenres(
-            selectedGenres.map((genre) => genre.id),
-            tracksPerGroup,
-            accessToken
-          );
-          allTracks.push(...genreTracks);
-        }
+//        if (selectedGenres.length > 0) {
+//         const genreTracks = await fetchTracksFromGenres(
+//           selectedGenres.map((genre) => genre.id),
+//            tracksPerGroup,
+//           accessToken
+//          );
+//         allTracks.push(...genreTracks);
+//      }
 
         if (selectedArtists.length > 0) {
           const artistTracks = await fetchTracksFromArtists(
@@ -157,17 +157,39 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
     return allTracks;
   };
 
-  const fetchTracksFromGenres = async (genres: string[], limit: number, accessToken: string) => {
-    const response = await axios.get('https://api.spotify.com/v1/recommendations', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      params: {
-        seed_genres: genres.join(','),
-        limit,
-      },
-    });
-    return response.data.tracks;
-  };
-
+//  const fetchTracksFromGenres = async (genres: string[], limit: number = 50, accessToken: string) => {
+    // Lista de géneros permitidos por Spotify (deberías tener una lista completa de géneros válidos)
+//    const validGenresList = [
+//      "pop", "rock", "hip-hop", "electronic", "jazz", "afrobeat", "latin", "classical", "blues", "folk", "soul"
+      // Agrega todos los géneros válidos aquí...
+//    ];
+  
+    // Filtrar géneros inválidos y limitar a un máximo de 5 géneros
+//    const validGenres = genres.filter(genre => validGenresList.includes(genre)).slice(0, 5);
+    
+//    if (validGenres.length === 0) {
+//      console.error("No valid genres selected for recommendations");
+//      alert("No valid genres selected for recommendations");
+//     return [];
+//    }
+    
+//    try {
+//      const response = await axios.get('https://api.spotify.com/v1/recommendations', {
+//        headers: { Authorization: `Bearer ${accessToken}` },
+//        params: {
+//          seed_genres: validGenres.join(','),
+//          limit,
+//       },
+//      });
+//     return response.data.tracks;
+//    } catch (error) {
+//      console.error("Error fetching tracks by genre:", error);
+//      alert("There was an error fetching tracks for the selected genres. Please try again.");
+//      return []; // Devuelve un array vacío en caso de error
+//   }
+//  };
+  
+  
   const fetchTracksFromArtists = async (artists: string[], limit: number, accessToken: string) => {
     let allTracks: any[] = [];
     for (const artist of artists) {
