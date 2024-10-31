@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './i18n';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { useUserCountry } from './hooks/useUserCountry';
 import { getFlagEmoji } from './utils/flags';
 import LanguageSwitcher from './components/LanguageSwitcher';
@@ -16,7 +16,6 @@ import MutatedModeGame from './components/MutatedModeGame';
 import { getUserStreak } from './utils/streaks';
 import Head from 'next/head';
 
-// Hook para verificar el tamaño de la pantalla
 const useMediaQuery = (width: number) => {
   const [isMatch, setIsMatch] = useState(false);
   useEffect(() => {
@@ -33,17 +32,15 @@ const HomePage: React.FC = () => {
   const { data: session, status } = useSession();
   const country = useUserCountry();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Para el menú móvil
   const [currentStreak, setCurrentStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
   const [totalGuesses, setTotalGuesses] = useState(0);
   const [correctGuesses, setCorrectGuesses] = useState(0);
-  const [gameMode, setGameMode] = useState<"classic" | "artist" | "mutated" | null>(null); // Manejar modo de juego
-  const [isGameStarted, setIsGameStarted] = useState(false); // Estado general del juego
+  const [gameMode, setGameMode] = useState<"classic" | "artist" | "mutated" | null>(null);
+  const [isGameStarted, setIsGameStarted] = useState(false);
   const [fragments, setFragments] = useState(3);
   const [duration, setDuration] = useState(5);
   const [mutatedSelection, setMutatedSelection] = useState<any[]>([]);
-  const menuRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery(640);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,30 +58,25 @@ const HomePage: React.FC = () => {
   }, [session, status]);
 
   useEffect(() => {
-    // Esperar hasta que las traducciones estén listas
     if (!i18n.isInitialized) {
       i18n.on('initialized', () => {
         setIsLoading(false);
       });
     } else {
-      setIsLoading(false); // Ya están inicializadas
+      setIsLoading(false);
     }
   }, [i18n]);
 
+  useEffect(() => {
+    if (gameMode || isGameStarted) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [gameMode, isGameStarted]);
+
   const accuracy = totalGuesses > 0 ? ((correctGuesses / totalGuesses) * 100).toFixed(2) : "0.00";
 
-  const handleStartConfig = () => {
-    setGameMode("classic");
-    setIsGameStarted(false);
-  };
-
-  const handleStartArtistConfig = () => {
-    setGameMode("artist");
-    setIsGameStarted(false);
-  };
-
-  const handleStartMutatedConfig = () => {
-    setGameMode("mutated");
+  const handleStartConfig = (mode: "classic" | "artist" | "mutated") => {
+    setGameMode(mode);
     setIsGameStarted(false);
   };
 
@@ -95,41 +87,27 @@ const HomePage: React.FC = () => {
   };
 
   const handleStartMutatedGame = (selection: any[], selectedFragments: number, selectedDuration: number) => {
-    console.log('Selección recibida en page.tsx:', selection); // Agregar un log para verificar la selección
     setMutatedSelection(selection);
     setFragments(selectedFragments);
     setDuration(selectedDuration);
     setIsGameStarted(true);
   };
-  
 
   const handleExit = () => {
-    setGameMode(null); // Salir de cualquier modo de juego
+    setGameMode(null);
     setIsGameStarted(false);
   };
 
-  // Cerrar el menú al hacer clic fuera del menú en modo móvil
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    if (isMobile) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMobile]);
-
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
-    setIsMenuOpen(false);
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>{t('loading')}...</p>
+      <div className="flex items-center justify-center h-screen bg-green-100">
+        <p className="text-2xl font-semibold text-gray-600 animate-pulse">Tracktive...</p>
       </div>
-    ); // Puedes mejorar este loader como desees
+    );
   }
 
   return (
@@ -146,98 +124,78 @@ const HomePage: React.FC = () => {
         <meta name="twitter:image" content="/static/tracktive-preview.jpg" />
       </Head>
 
-      <div className="bg-green-100 min-h-screen flex flex-col">
-        <nav className="flex justify-between items-center p-6 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white">
-          {isMobile ? (
-            <>
-              <span className="text-lg font-bold">Tracktive</span>
-              <div className="relative" ref={menuRef}>
+      <div className="bg-green-100 min-h-screen flex flex-col pt-28">
+        <nav className="flex justify-between items-center p-6 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white fixed top-0 w-full z-50 shadow-lg">
+          <div className="flex items-center relative">
+            {status === "authenticated" ? (
+              <>
                 <img
                   src={session?.user?.image || '/default-profile.png'}
                   alt={t("profileAlt")}
                   className="w-10 h-10 rounded-full cursor-pointer"
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
                 />
-                {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10">
-                    {/* contenido del menú móvil */}
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center relative">
-                {status === "authenticated" ? (
-                  <>
-                    <img
-                      src={session.user?.image || '/default-profile.png'}
-                      alt={t("profileAlt")}
-                      className="w-10 h-10 rounded-full mr-3 cursor-pointer"
-                      onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    />
-                    <span onClick={() => setIsProfileOpen(!isProfileOpen)} className="mr-2 cursor-pointer">
-                      {session.user?.name}
-                    </span>
-                    {country && <span>{getFlagEmoji(country)}</span>}
-                    <span className="ml-2 text-xl">🔥{currentStreak}</span>
+                <span className="ml-2 cursor-pointer font-semibold">{session.user?.name}</span>
+                {country && <span className="ml-2 text-xl">{getFlagEmoji(country)}</span>}
+                <span className="ml-4 text-xl">🔥{currentStreak}</span>
+              </>
+            ) : (
+              <button
+                onClick={() => signIn()}
+                className="bg-blue-500 px-4 py-2 rounded-md text-white hover:bg-blue-600 transition-colors"
+              >
+                {t("signInWithSpotify")}
+              </button>
+            )}
+          </div>
 
-                    {isProfileOpen && (
-                      <div className="absolute top-full mt-2 w-64 bg-white rounded-md shadow-lg z-10">
-                        <div className="py-2">
-                          {/* Detalles del perfil */}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <button
-                    onClick={() => signIn()}
-                    className="bg-blue-500 px-4 py-2 rounded-md text-white hover:bg-blue-600"
-                  >
-                    {t("signInWithSpotify")}
-                  </button>
-                )}
-              </div>
-
-              <div className="flex-grow text-center">
-                <button onClick={handleStartConfig} className="ml-2 mr-4 text-lg font-medium">
-                  {t("classicMode")}
-                </button>
-                <button onClick={handleStartArtistConfig} className="ml-2 mr-4 text-lg font-medium">
-                  {t("artistChallenge")}
-                </button>
-                <button onClick={handleStartMutatedConfig} className="ml-2 mr-4 text-lg font-medium">
-                  {t("moddedMode")}
-                </button>
-              </div>
-              <LanguageSwitcher isAuthenticated={status === "authenticated"} />
-            </>
-          )}
+          {/* Language and Mode Switcher */}
+          <LanguageSwitcher 
+            isAuthenticated={status === "authenticated"} 
+            onGameModeChange={handleStartConfig} 
+            gameMode={gameMode}
+            onExit={handleExit}
+          />
         </nav>
 
-        {/* Renderizar el modo de juego correspondiente */}
-        {gameMode === "classic" ? (
-          isGameStarted ? (
-            <ClassicModeGame fragments={fragments} duration={duration} onExit={handleExit} />
-          ) : (
-            <ClassicModeConfig onStartGame={handleStartGame} />
-          )
-        ) : gameMode === "artist" ? (
-          isGameStarted ? (
-            <ArtistModeGame fragments={fragments} duration={duration} onExit={handleExit} />
-          ) : (
-            <ArtistModeConfig onStartGame={handleStartGame} />
-          )
-        ) : gameMode === "mutated" ? (
-          isGameStarted ? (
-            <MutatedModeGame selection={mutatedSelection} fragments={fragments} duration={duration} onExit={handleExit} />
-          ) : (
-            <MutatedModeConfig onStartGame={handleStartMutatedGame} />
-          )
+        {gameMode && isGameStarted ? (
+          <div className="mt-20">
+            {gameMode === "classic" ? (
+              <ClassicModeGame fragments={fragments} duration={duration} onExit={handleExit} />
+            ) : gameMode === "artist" ? (
+              <ArtistModeGame fragments={fragments} duration={duration} onExit={handleExit} />
+            ) : (
+              <MutatedModeGame selection={mutatedSelection} fragments={fragments} duration={duration} onExit={handleExit} />
+            )}
+          </div>
+        ) : gameMode ? (
+          <div className="mt-20">
+            {gameMode === "classic" ? (
+              <ClassicModeConfig onStartGame={handleStartGame} />
+            ) : gameMode === "artist" ? (
+              <ArtistModeConfig onStartGame={handleStartGame} />
+            ) : (
+              <MutatedModeConfig onStartGame={handleStartMutatedGame} />
+            )}
+          </div>
         ) : (
-          <div className="flex flex-1 p-4 gap-4 max-w-screen-xl w-full mx-auto">
-            {/* Contenido principal */}
+          <div className="flex flex-1 justify-center items-center px-4 py-12">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-screen-md">
+              {[
+                { mode: "classic", label: t("classicMode"), bg: "bg-blue-500" },
+                { mode: "artist", label: t("artistChallenge"), bg: "bg-purple-500" },
+                { mode: "mutated", label: t("moddedMode"), bg: "bg-teal-500" },
+              ].map(({ mode, label, bg }) => (
+                <div
+                  key={mode}
+                  onClick={() => handleStartConfig(mode as "classic" | "artist" | "mutated")}
+                  className={`${bg} p-8 rounded-lg shadow-lg cursor-pointer transform transition duration-500 ease-in-out hover:scale-105 text-white hover:bg-opacity-90`}
+                >
+                  <h3 className="text-2xl font-bold transform transition duration-300 ease-in-out hover:scale-110">{label}</h3>
+                  <p className="mt-4 text-sm text-gray-100">{t(`${mode}Description`)}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

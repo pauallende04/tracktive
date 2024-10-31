@@ -26,6 +26,17 @@ const ArtistModeGame = ({
   const [isGuessedCorrectly, setIsGuessedCorrectly] = useState(false);
   const [playTimeoutId, setPlayTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar si estamos en un dispositivo móvil
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const savePlayedTrack = (trackId: string) => {
     const playedTracks = JSON.parse(localStorage.getItem('playedTracks') || '[]');
@@ -135,9 +146,145 @@ const ArtistModeGame = ({
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-green-100 pt-16">
+    <div className={`flex flex-col items-center min-h-screen bg-green-100 pt-16 ${isMobile ? 'p-4' : 'p-8'}`}>
       {isGuessedCorrectly && <Confetti />}
-      {/* Render y lógica del juego */}
+      
+      <div className="mb-10">
+        <h2
+          style={{
+            fontSize: track?.track?.name?.length > 20 ? '1.5rem' : '2rem',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: '100%',
+          }}
+          className={`font-bold mb-4 transition-all duration-700 ease-in-out ${isGuessedCorrectly ? 'scale-110 opacity-90' : 'filter blur-lg'}`}
+        >
+          {isGuessedCorrectly ? track.track.name : track?.track.name.replace(/./g, '*')}
+        </h2>
+      </div>
+
+      {track && (
+        <div className="mb-4">
+          {Array.from({ length: fragments }).map((_, index) => (
+            <div key={index} className="flex items-center mb-4">
+              <audio id={`audio-fragment-${index}`} src={track.track.preview_url} preload="auto" />
+              <button
+                onClick={() => handlePlay(index)}
+                className={`bg-green-500 text-white px-4 py-2 rounded-full shadow-md ${isMobile ? 'w-full' : ''}`}
+              >
+                {playingIndex === index ? `${timeLeft} s restantes` : `Fragmento ${index + 1}`}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className={`mb-8 w-full flex flex-col items-center space-y-2 ${isMobile ? 'max-w-xs' : 'w-64'}`}>
+        <input
+          type="text"
+          value={guess}
+          onChange={handleSearchChange}
+          placeholder="Buscar canción..."
+          className="border rounded-md px-4 py-2 w-full"
+        />
+
+        {suggestions.length > 0 && (
+          <div className="mt-2 bg-white border rounded-md shadow-lg w-full max-h-40 overflow-y-auto">
+            {suggestions.map((suggestion: any, idx: number) => (
+              <div
+                key={idx}
+                onClick={() => setGuess(suggestion.name)}
+                className="flex items-center space-x-3 px-4 py-2 cursor-pointer hover:bg-gray-100"
+              >
+                <img
+                  src={suggestion.album.images[0]?.url}
+                  alt="Album cover"
+                  className="w-10 h-10 rounded-full"
+                />
+                <span>{suggestion.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex space-x-2 w-full mt-2">
+          <button onClick={checkGuess} className="bg-blue-500 text-white px-4 py-2 rounded w-3/4">
+            Adivinar
+          </button>
+          <button
+            onClick={() => setShowHint(!showHint)}
+            className="bg-yellow-400 text-white p-2 rounded flex items-center justify-center w-1/4 transition-all duration-300 hover:w-1/2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M3 12h1m8 -9v1m8 8h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7" />
+              <path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3" />
+              <path d="M9.7 17l4.6 0" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {showHint && track && (
+        <div className="flex justify-center items-center mt-4">
+          <img src={track.track.album.images[0]?.url} alt="Album cover" className="w-32 h-32 rounded-md shadow-lg" />
+        </div>
+      )}
+
+      {result && <p className={`text-lg font-semibold ${result === "¡Correcto!" ? "text-green-500" : "text-red-500"}`}>{result}</p>}
+
+      <div className="flex space-x-4 mt-8">
+        {isGuessedCorrectly ? (
+          <button
+            onClick={() => {
+              setIsGuessedCorrectly(false);
+              setShowHint(false);
+              setResult('');
+              loadNewTrack();
+            }}
+            className={`bg-yellow-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-yellow-600 transition ${isMobile ? 'w-full' : ''}`}
+          >
+            Siguiente canción
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              setShowHint(false);
+              setResult('');
+              loadNewTrack();
+              setGuess('');
+              setIsGuessedCorrectly(false);
+            }}
+            className={`bg-gray-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-gray-600 transition ${isMobile ? 'w-full' : ''}`}
+          >
+            Saltar
+          </button>
+        )}
+
+        {isGuessedCorrectly && (
+          <button
+            onClick={() => { onExit(); }}
+            className="bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-red-600 transition"
+          >
+            Salir
+          </button>
+        )}
+      </div>
+
+      {track && (
+        <audio id="audio-full" src={track.track.preview_url} preload="auto" />
+      )}
     </div>
   );
 };

@@ -36,12 +36,22 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
   const [showHint, setShowHint] = useState(false);
   const [tracks, setTracks] = useState<any[]>([]);
   const [audioFragments, setAudioFragments] = useState<{ start: number; end: number }[]>([]);
+  const [isLoadingTracks, setIsLoadingTracks] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detección de dispositivo móvil
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const generateObfuscatedTitle = (title: string) => title.replace(/./g, '*');
 
-  const shuffleArray = (array: any[]) => {
-    return array.sort(() => Math.random() - 0.5);
-  };
+  const shuffleArray = (array: any[]) => array.sort(() => Math.random() - 0.5);
 
   const savePlayedTrack = (trackId: string) => {
     const playedTracks = JSON.parse(localStorage.getItem('playedTracks') || '[]');
@@ -55,24 +65,18 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
 
   const loadNewTrack = async (availableTracks: any[]) => {
     setShowHint(false);
-
     if (availableTracks.length > 0) {
       const randomIndex = Math.floor(Math.random() * availableTracks.length);
       const newTrack = availableTracks[randomIndex];
       setTrack(newTrack);
-
       const obfuscatedTitle = generateObfuscatedTitle(newTrack.name);
       setObfuscatedTitle(obfuscatedTitle);
-
       savePlayedTrack(newTrack.id);
-
       const fragmentDurations = Array.from({ length: fragments }).map(() => {
         const fragmentStart = Math.random() * (30 - duration);
         return { start: fragmentStart, end: fragmentStart + duration };
       });
-
       setAudioFragments(fragmentDurations);
-
       setIsGuessedCorrectly(false);
       setGuess('');
 
@@ -91,6 +95,7 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
   useEffect(() => {
     if (accessToken) {
       const fetchTracks = async () => {
+        setIsLoadingTracks(true);
         let allTracks: any[] = [];
         const selectedPlaylists = selection.filter((item) => item.type === 'playlist');
         const selectedGenres = selection.filter((item) => item.type === 'genre');
@@ -126,7 +131,8 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
 
         const shuffledAllTracks = shuffleArray(allTracks);
         setTracks(shuffledAllTracks);
-        loadNewTrack(shuffledAllTracks);
+        await loadNewTrack(shuffledAllTracks);
+        setIsLoadingTracks(false);
       };
 
       fetchTracks();
@@ -282,13 +288,21 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
     }
   };
 
+  if (isLoadingTracks) {
+    return (
+      <div className="flex items-center justify-center h-screen w-screen bg-green-100 fixed top-0 left-0 z-50">
+        <p className="text-2xl font-semibold text-gray-600 animate-pulse">{t('loadingTracks')}...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>
         <title>{t('moddedMode')} - Tracktive</title>
         <meta name="description" content={t('description')} />
       </Head>
-      <div className="flex flex-col items-center min-h-screen bg-green-100 pt-16">
+      <div className={`flex flex-col items-center min-h-screen bg-green-100 pt-16 ${isMobile ? 'px-4' : ''}`}>
         {isGuessedCorrectly && <Confetti />}
         
         <div className="mb-10">
@@ -300,22 +314,24 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
               textOverflow: 'ellipsis',
               maxWidth: '100%',
             }}
-            className={`font-bold mb-4 transition-all duration-700 ease-in-out ${
-              isGuessedCorrectly ? 'filter-none' : 'filter blur-lg'
-            }`}
+            className={`font-bold mb-4 transition-all duration-700 ease-in-out transform ${
+              isGuessedCorrectly ? 'scale-110 opacity-90' : 'filter blur-lg'
+            } ${isMobile ? 'text-center' : ''}`}
           >
             {isGuessedCorrectly ? track.name : obfuscatedTitle}
           </h2>
         </div>
 
         {track && (
-          <div className="mb-4">
+          <div className={`mb-4 ${isMobile ? 'flex-col items-center space-y-4' : ''}`}>
             {Array.from({ length: fragments }).map((_, index) => (
-              <div key={index} className="flex items-center mb-4">
+              <div key={index} className={`flex items-center mb-4 ${isMobile ? 'w-full' : ''}`}>
                 <audio id={`audio-fragment-${index}`} src={track.preview_url} preload="auto" />
                 <button
                   onClick={() => handlePlay(index)}
-                  className="bg-green-500 text-white px-4 py-2 rounded-full shadow-md"
+                  className={`bg-green-500 text-white px-4 py-2 rounded-full shadow-md ${
+                    isMobile ? 'w-full' : 'w-auto'
+                  }`}
                 >
                   {playingIndex === index ? `${timeLeft} ${t('remainingTime')}` : `${t('trackSegment')} ${index + 1}`}
                 </button>
@@ -353,12 +369,14 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
           )}
 
           <div className="flex space-x-2 w-full mt-2">
-            <button onClick={checkGuess} className="bg-blue-500 text-white px-4 py-2 rounded w-3/4">
+            <button onClick={checkGuess} className={`bg-blue-500 text-white px-4 py-2 rounded ${isMobile ? 'w-full' : 'w-3/4'}`}>
               {t('play')}
             </button>
             <button
               onClick={() => setShowHint(!showHint)}
-              className="bg-yellow-400 text-white p-2 rounded flex items-center justify-center w-1/4 transition-all duration-300 hover:w-1/2"
+              className={`bg-yellow-400 text-white p-2 rounded flex items-center justify-center ${
+                isMobile ? 'w-full' : 'w-1/4'
+              } transition-all duration-300 hover:w-1/2`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -397,7 +415,7 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
                 setResult('');
                 loadNewTrack(tracks);
               }}
-              className="bg-yellow-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-yellow-600 transition"
+              className={`bg-yellow-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-yellow-600 transition ${isMobile ? 'w-full' : ''}`}
             >
               {t('nextSong')}
             </button>
@@ -410,7 +428,7 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
                 setGuess('');
                 setIsGuessedCorrectly(false);
               }}
-              className="bg-gray-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-gray-600 transition"
+              className={`bg-gray-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-gray-600 transition ${isMobile ? 'w-full' : ''}`}
             >
               {t('skip')}
             </button>
@@ -419,7 +437,7 @@ const MutatedModeGame: React.FC<MutatedModeGameProps> = ({
           {isGuessedCorrectly && (
             <button
               onClick={() => { onExit(); }}
-              className="bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-red-600 transition"
+              className={`bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-red-600 transition ${isMobile ? 'w-full' : ''}`}
             >
               {t('exit')}
             </button>
