@@ -1,11 +1,14 @@
+// src/app/components/ArtistModeConfig.tsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import JoinCreateRoomModal from './JoinCreateRoomModal';
 
 const ArtistModeConfig = ({ onStartGame }: { onStartGame: (fragments: number, duration: number) => void }) => {
   const [fragments, setFragments] = useState(3);
   const [duration, setDuration] = useState(5);
-  const { t } = useTranslation('common');
   const [isMobile, setIsMobile] = useState(false);
+  const [showRoomModal, setShowRoomModal] = useState(false);
+  const { t } = useTranslation('common');
 
   // Detectar si el dispositivo es móvil
   useEffect(() => {
@@ -16,6 +19,10 @@ const ArtistModeConfig = ({ onStartGame }: { onStartGame: (fragments: number, du
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleRoomButtonClick = () => {
+    setShowRoomModal(true);
+  };
 
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen bg-green-100 ${isMobile ? 'px-4' : ''}`}>
@@ -54,7 +61,18 @@ const ArtistModeConfig = ({ onStartGame }: { onStartGame: (fragments: number, du
         {t('play')}
       </button>
 
+      <button 
+        onClick={handleRoomButtonClick}
+        className={`px-4 py-2 bg-blue-500 text-white font-semibold rounded-full shadow-lg hover:bg-blue-400 transition ${isMobile ? 'w-full' : ''}`}
+      >
+        {t('joinOrCreateRoom')}
+      </button>
+
       <p className={`text-gray-400 italic ${isMobile ? 'text-center' : ''}`}>{t('guessArtist')}</p>
+
+      {showRoomModal && (
+        <JoinCreateRoomModal onClose={() => setShowRoomModal(false)} />
+      )}
     </div>
   );
 };

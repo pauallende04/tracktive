@@ -58,5 +58,22 @@
   "classicDescription": "Enfréntate al desafío clásico adivinando canciones populares con fragmentos rápidos.",
   "artistDescription": "Demuestra tu conocimiento de artistas adivinando las canciones de sus éxitos.",
   "mutatedDescription": "Personaliza tu experiencia con playlists, géneros o artistas específicos en el modo mutado.",
-  "loadingTracks": "Cargando Canciones"
+  "loadingTracks": "Cargando Canciones",
+  "loading": "Cargando",
+  "joinOrCreateRoom": "Únete o crea sala",
+  "joinRoom": "¡Únete a una sala!",
+  "roomPassword": "Código de sala",
+  "createRoomInstead": "Crea una sala...",
+  "createRoom": "¡Crea una sala!",
+  "roomName": "Nombre de Sala",
+  "joinRoomInstead": "Únete a una sala...",
+  "close": "Cerrar",
+  "enterRoomCode": "Escribe el nombre de la sala...",
+  "enterRoomPassword": "Escribe el código de sala...",
+  "failedToCreateRoom": "Error en la creación de la sala.",
+  "roomNotFoundOrIncorrectPassword": "No se ha encontrado la sala o esta es incorrecta.",
+  "roomCode": "Código de sala",
+  "goToWaitingRoom": "Ir a la sala ->",
+  "enterRoomName": "Escribe el nombre de la sala...",
+  "waitingForMaster": "Esperando al master..."
 }

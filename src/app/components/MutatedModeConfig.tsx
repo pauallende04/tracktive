@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import JoinCreateRoomModal from './JoinCreateRoomModal';
 
 interface MutatedModeConfigProps {
   onStartGame: (selection: any[], fragments: number, duration: number) => void;
@@ -25,6 +26,22 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
   const [duration, setDuration] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
   const isGenresDisabled = true;
+  const [isMobile, setIsMobile] = useState(false);
+  const [showRoomModal, setShowRoomModal] = useState(false);
+
+  // Detectar si el dispositivo es móvil
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleRoomButtonClick = () => {
+    setShowRoomModal(true);
+  };
 
   // Calcular si se puede iniciar el juego
   const canStartGame = selectedPlaylists.length > 0 || selectedArtists.length > 0;
@@ -238,13 +255,25 @@ const MutatedModeConfig: React.FC<MutatedModeConfigProps> = ({ onStartGame }) =>
           
           onStartGame(newSelection, fragments, duration);
         }}
-        className={`px-6 py-3 mt-10 font-semibold rounded-full shadow-lg transition ${
+        className={`px-6 py-3 mt-10 mb-8 font-semibold rounded-full shadow-lg transition ${
           canStartGame ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-gray-400 text-gray-200 cursor-not-allowed'
         }`}
         disabled={!canStartGame}
       >
         {t('play')}
       </button>
+      <button 
+        onClick={handleRoomButtonClick}
+        className={`px-4 py-2 mb-6 bg-blue-500 text-white font-semibold rounded-full shadow-lg hover:bg-blue-400 transition ${isMobile ? 'w-full' : ''}`}
+      >
+        {t('joinOrCreateRoom')}
+      </button>
+
+      <p className={`text-gray-400 italic ${isMobile ? 'text-center' : ''}`}>{t('howToPlayContent')}</p>
+
+      {showRoomModal && (
+        <JoinCreateRoomModal onClose={() => setShowRoomModal(false)} />
+      )}
     </div>
   );
 };
