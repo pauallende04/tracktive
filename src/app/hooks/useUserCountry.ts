@@ -5,6 +5,7 @@ import axios from 'axios';
 export const useUserCountry = () => {
   const { data: session } = useSession();
   const [country, setCountry] = useState<string | null>(null);
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   useEffect(() => {
     const fetchUserCountry = async () => {
@@ -17,8 +18,12 @@ export const useUserCountry = () => {
           });
           console.log('User Profile Data:', response.data);
           setCountry(response.data.country);
-        } catch (error) {
-          console.error('Error fetching user country:', error);
+        } catch (error: any) {
+          if (error.response?.status === 401) {
+            setIsUnauthorized(true); // Indicamos que el error es 401
+          } else {
+            console.error('Error fetching user country:', error);
+          }
         }
       }
     };
@@ -26,5 +31,5 @@ export const useUserCountry = () => {
     fetchUserCountry();
   }, [session]);
 
-  return country;
+  return { country, isUnauthorized };
 };

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import './i18n';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import { useUserCountry } from './hooks/useUserCountry';
 import { getFlagEmoji } from './utils/flags';
 import LanguageSwitcher from './components/LanguageSwitcher';
@@ -15,6 +15,7 @@ import MutatedModeConfig from './components/MutatedModeConfig';
 import MutatedModeGame from './components/MutatedModeGame';
 import { getUserStreak } from './utils/streaks';
 import Head from 'next/head';
+
 
 const useMediaQuery = (width: number) => {
   const [isMatch, setIsMatch] = useState(false);
@@ -30,7 +31,7 @@ const useMediaQuery = (width: number) => {
 const HomePage: React.FC = () => {
   const { t, i18n } = useTranslation('common');
   const { data: session, status } = useSession();
-  const country = useUserCountry();
+  const { country, isUnauthorized } = useUserCountry();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
@@ -43,6 +44,7 @@ const HomePage: React.FC = () => {
   const [mutatedSelection, setMutatedSelection] = useState<any[]>([]);
   const isMobile = useMediaQuery(640);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasTriedSignOut, setHasTriedSignOut] = useState(false);
 
   useEffect(() => {
     const fetchUserStats = async () => {
@@ -72,6 +74,13 @@ const HomePage: React.FC = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [gameMode, isGameStarted]);
+
+  useEffect(() => {
+    if (isUnauthorized && status === "authenticated") {
+      console.error("Error 401: Unauthorized. Redirecting to sign-in.");
+      signOut();
+    }
+  }, [isUnauthorized, status]);
 
   const accuracy = totalGuesses > 0 ? ((correctGuesses / totalGuesses) * 100).toFixed(2) : "0.00";
 
